@@ -9,7 +9,9 @@ export default class GuruPlugin extends Plugin {
     settings: GuruSettings;
 
     async onload() {
-        const files = await this.getAllFiles();
+        await this.loadSettings();
+
+        const files = await this.getAllVaultFiles();
         console.log(files)
         const preprocessedFiles = await this.sendToPythonScript(files);
         console.log(preprocessedFiles);
@@ -61,7 +63,7 @@ export default class GuruPlugin extends Plugin {
     }
 
     // PREPROCESSING ------------------------------------------------
-    async getAllFiles() {
+    async getAllVaultFiles() {
         const files: TFile[] = this.app.vault.getFiles();
         
         const fileObjects = files.map(async (f) => {
@@ -80,12 +82,12 @@ export default class GuruPlugin extends Plugin {
             }
         });
 
-        return fileObjects;
+        return await Promise.all(fileObjects);
     }
 
-    async sendToPythonScript(files: object[]): Promise<string[]> {
+    async sendToPythonScript(files: TFile[]): Promise<string[]> {
         return new Promise((resolve, reject) => {
-            const pythonProcess = spawn('python', ['./preprocessing.py']);
+            const pythonProcess = spawn('python', ['./src/preprocessing.py']);
             const results: string[] = [];
 
             pythonProcess.stdout.on('data', (data) => {

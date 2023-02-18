@@ -2,6 +2,24 @@ import { FileSystemAdapter, Notice, Plugin, TFile, CachedMetadata, getAllTags } 
 import { PythonShell } from 'python-shell';
 import { GraphGuruSettings, GraphGuruSettingTab, DefaultGuruSettings } from './settings';
 
+// const test_coordinates = [  {coords: [0.00355128, 0.14330955]},
+//                             {coords: [-0.01840003, 0.15422342]},
+//                             {coords: [-0.30591294, -0.11079613]},
+//                             {coords: [-0.27770398, -0.0548101]},
+//                             {coords: [-0.28004129, -0.11006741]},
+//                             {coords: [-0.30041763, -0.08313805]},
+//                             {coords: [-0.24007989, -0.10953094]},
+//                             {coords: [0.28609557, -0.26272716]},
+//                             {coords: [0.31823789, -0.20931468]},
+//                             {coords: [0.29171426, -0.2530871]},
+//                             {coords: [0.32597832, -0.04688666]},
+//                             {coords: [0.10558672, 0.34822129]},
+//                             {coords: [0.12127385, 0.33224248]},
+//                             {coords: [0.07495285, 0.31229199]},
+//                             {coords: [-0.03595148, -0.05764129]},
+//                             {coords: [-0.06888351, 0.00771078]}
+//                         ]
+
 export default class GraphGuruPlugin extends Plugin {
     settings: GraphGuruSettings;
     path: string;
@@ -20,7 +38,6 @@ export default class GraphGuruPlugin extends Plugin {
         await this.saveSettings();
         this.addSettingTab(new GraphGuruSettingTab(this.app, this));
         this.statusBar = this.addStatusBarItem();
-		this.statusBar.setText(`Focused Directory is ${this.settings.focus_directory}`);
 
         this.addCommand({
             id: 'init-graph-guru',
@@ -29,9 +46,14 @@ export default class GraphGuruPlugin extends Plugin {
                 const guruCoordinates = await this.initialize();
                 if (guruCoordinates != null) {
                     this.guruCoordinates = guruCoordinates;
+                    // this.guruCoordinates = test_coordinates;
                     new Notice("GraphGuru is initialized");
+                    this.statusBar.setText(`GraphGuru Initialized ✅`);
+                    console.log(this.guruCoordinates);
+                    // await this.writeToCSV(this.guruCoordinates);
                 } else {
                     new Notice("GraphGuru is not initialized");
+                    this.statusBar.setText(`GraphGuru Not Initialized 😡`);
                 }
             }
         });
@@ -39,19 +61,33 @@ export default class GraphGuruPlugin extends Plugin {
         this.addRibbonIcon("palmtree", "Open GraphGuru", async () => { // or map or anchor for icon 
             if (this.guruCoordinates != null) {
                 new Notice("GraphGuru is initialized");
-                // console.log(this.guruCoordinates);
             } else {
                 new Notice("GraphGuru is not initialized");
             }
         });
     }
 
+    // public async writeToCSV(coordinates : object[]) {    
+    //     const headers = "type,lat,long,link\n";
+
+    //     // Create a string with the coordinates in CSV format
+    //     let csvData = "";
+    //     for (const c of coordinates) {
+    //         const lat = c.coords[0];
+    //         const lon = c.coords[0];
+    //         csvData += `,,${lat},${lon}\n`;
+    //     }
+
+    //     const fileContent = headers + csvData;
+
+    //     this.app.vault.adapter.write('coords.csv', fileContent);
+    // }
+
     public async initialize() {
         console.log("Initializing GraphGuru");
         try {
-            const files = Promise.all(await this.getVaultAllFiles());
-            const result = await this.sendToPython(await files);
-            console.log(result);
+            const files = await Promise.all(await this.getVaultAllFiles());
+            const result = await this.sendToPython(files);
             return result;
         } catch(error) {
             console.log(error);
@@ -104,8 +140,8 @@ export default class GraphGuruPlugin extends Plugin {
             }
 
             return {
-                text: text,
                 // metadata: metadata,
+                text: text,
                 tags: tags
             }
         });

@@ -6,7 +6,7 @@ def main():
     # Convert the JSON string to a Python dictionary
     data = json.loads(data)
     # Process the data
-    data["python"] = "Hello from Python!"
+    data["python"] = "we made it"
     # convert the Python dictionary to a JSON string
     data = json.dumps(data)
     # Send the JSON string to Node.js

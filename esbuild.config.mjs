@@ -15,6 +15,7 @@ const context = await esbuild.context({
 	banner: {
 		js: banner,
 	},
+	// entryPoints: ["./src/main.ts", "./src/preprocessing.py"],
 	entryPoints: ["./src/main.ts"],
 	bundle: true,
 	external: [
@@ -38,6 +39,7 @@ const context = await esbuild.context({
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
 	outfile: "./main.js",
+	// outdir: "dist"
 });
 
 if (prod) {

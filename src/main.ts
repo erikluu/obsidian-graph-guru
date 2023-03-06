@@ -28,10 +28,10 @@ export default class GraphGuruPlugin extends Plugin {
     guruCoordinates: object[] | unknown[] | null = null;
 
     async onload() {
-    
         if (this.app.vault.adapter instanceof FileSystemAdapter) {
 			this.path = this.app.vault.adapter.getBasePath();
-            this.pythonScriptsPath = this.path + '/.obsidian/plugins/obsidian-graph-guru/src/processing/test.py';
+            // this.pythonScriptsPath = this.path + '/.obsidian/plugins/obsidian-graph-guru/src/processing/async_script.py';
+            this.pythonScriptsPath = this.path + '/.obsidian/plugins/obsidian-graph-guru/src/processing/script.py';
 		}
 
         this.settings = Object.assign({}, DefaultGuruSettings, await this.loadData());
@@ -86,47 +86,39 @@ export default class GraphGuruPlugin extends Plugin {
     public async initialize() {
         console.log("Initializing GraphGuru");
         try {
-            const files = await Promise.all(await this.getVaultAllFiles());
-            const result = await this.sendToPython(files);
+            // const files = await Promise.all(await this.getVaultAllFiles());
+            // const result = await this.sendToPython(files);
+            const result = await this.sendToPython();
             return result;
         } catch(error) {
             console.log(error);
         }
     }
 
-    async sendToPython(files: object[]) {
+    async sendToPython() {
         try {
-            const operations = files.map(input =>
-                new Promise((resolve, reject) => {
-                const pyshell = new PythonShell(this.pythonScriptsPath);
-            
-                pyshell.send(JSON.stringify(input));
-            
-                pyshell.on('message', (message) => {
+            const pyshell = new PythonShell(this.pythonScriptsPath);
+            pyshell.send(this.app.vault.configDir); // actually send script
+            pyshell.on('message', (message) => {
                 try {
                     const output = JSON.parse(message);
-                    resolve(output);
                 } catch (err) {
-                    reject(err);
-                    }
-                });
-        
-                pyshell.end(function (err, code, signal) {
-                    if (err) throw err;
-                    console.log('The exit code was: ' + code);
-                    console.log('The exit signal was: ' + signal);
-                    console.log('finished');
-                });
-                })
-            );
-            
-            const results = await Promise.all(operations);
-            return results;
+                    console.log(err);    
+                }
+            });
+
+            pyshell.end(function (err, code, signal) {
+                if (err) throw err;
+                console.log('The exit code was: ' + code);
+                console.log('The exit signal was: ' + signal);
+                console.log('finished');
+            });
+  
         } catch (error) {
             console.log(error);
         }
     }
-        
+
     async getVaultAllFiles() {
         const files: TFile[] = this.app.vault.getFiles();
         

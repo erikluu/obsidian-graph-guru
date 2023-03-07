@@ -4,16 +4,16 @@ const { spawn } = require('child_process');
 import { GraphGuruSettings, GraphGuruSettingTab, DefaultGuruSettings } from './settings';
 
 export default class GraphGuruPlugin extends Plugin {
-    settings: GraphGuruSettings;
-    scriptsPath: string;
-    pythonScriptsPath: string;
-    statusBar: HTMLElement;
     guruCoordinates: object[] | unknown[] | null = null;
-    envPath: string;
+    baseVaultPath: string;
+    pythonScriptsPath: string;
+    settings: GraphGuruSettings;
+    statusBar: HTMLElement;
 
     async onload() {
         if (this.app.vault.adapter instanceof FileSystemAdapter) {
-			this.scriptsPath = this.app.vault.adapter.getBasePath();
+			this.baseVaultPath = this.app.vault.adapter.getBasePath();
+            this.pythonScriptsPath = this.baseVaultPath + '/.obsidian/plugins/obsidian-graph-guru/src/python_scripts/script.py';
 		}
 
         this.settings = Object.assign({}, DefaultGuruSettings, await this.loadData());
@@ -25,7 +25,7 @@ export default class GraphGuruPlugin extends Plugin {
             id: 'init-graph-guru',
             name: 'Initialize GraphGuru',
             callback: async () => {
-                const guruCoordinates = await this.initialize();
+                const guruCoordinates = await this.runPython();
                 if (guruCoordinates != null) {
                     this.guruCoordinates = guruCoordinates;
                     // this.guruCoordinates = test_coordinates;
@@ -49,58 +49,17 @@ export default class GraphGuruPlugin extends Plugin {
         });
     }
 
-    // public async writeToCSV(coordinates : object[]) {    
-    //     const headers = "type,lat,long,link\n";
-
-    //     // Create a string with the coordinates in CSV format
-    //     let csvData = "";
-    //     for (const c of coordinates) {
-    //         const lat = c.coords[0];
-    //         const lon = c.coords[0];
-    //         csvData += `,,${lat},${lon}\n`;
-    //     }
-
-    //     const fileContent = headers + csvData;
-
-    //     this.app.vault.adapter.write('coords.csv', fileContent);
-    // }
-
-    public async initialize() {
-        console.log("Initializing GraphGuru");
-        try {
-            // const files = await Promise.all(await this.getVaultAllFiles());
-            // const result = await this.sendToPython(files);
-            const result = await this.sendToPython();
-            return result;
-        } catch(error) {
-            console.log(error);
-        }
-    }
-
-    async sendToPython() {
+    async runPython() {
         try {
             let options = {
                 pythonPath: this.settings.pythonInterpreter,
+                args: [this.baseVaultPath]
             }
 
-            const pyshell = new PythonShell(this.pythonScriptsPath, options);
-            pyshell.send(this.app.vault.configDir); // actually send script
-            pyshell.on('message', (message) => {
-                try {
-                    const output = message;
-                    console.log(output);
-                } catch (err) {
-                    console.log(err);    
-                }
-            });
+            const result = await PythonShell.run(this.pythonScriptsPath, options);
+            console.log(`Python results: ${result}`);
 
-            pyshell.end(function (err, code, signal) {
-                if (err) throw err;
-                console.log('The exit code was: ' + code);
-                console.log('The exit signal was: ' + signal);
-                console.log('finished');
-            });
-  
+            return result;
         } catch (error) {
             console.log(error);
         }
@@ -112,5 +71,6 @@ export default class GraphGuruPlugin extends Plugin {
 
     onunload() {
         console.log('unloading plugin');
+        // uninstall python dependencies? meh
     }
 }

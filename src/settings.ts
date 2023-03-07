@@ -32,7 +32,7 @@ export class GraphGuruSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
 			.setName('Python interpreter')
-			.setDesc('Path to your python interpreter, e.g. `/usr/bin/python`.')
+			.setDesc('Path to your python interpreter, e.g. `/usr/bin/python`. If you are using a virtual environment, you can find the path to your python interpreter by running `which python` in your virtual environment. Requires Python 3.9 or higher.')
 			.setClass('wideSettingsElement')
 			.addText(text => text
 				.setValue(this.plugin.settings.pythonInterpreter)
@@ -48,7 +48,7 @@ export class GraphGuruSettingTab extends PluginSettingTab {
                 button.setButtonText('Install dependencies');
                 button.onClick(evt => {
                     let interpreter = this.plugin.settings.pythonInterpreter;
-                    let command = `${interpreter} -u -m pip install --upgrade openai numpy obsidiantools scikit-learn tenacity`;
+                    let command = `${interpreter} -u -m pip install --upgrade openai numpy obsidiantools scikit-learn tenacity markdown pymdown-extensions html2text pandas numpy networkx`;
                     new Notice('Installing dependencies; this may take some time...');
                     exec(command, (error, stdout, stderr) => {
                         if (error) {

@@ -23,7 +23,7 @@ export default class GraphGuruPlugin extends Plugin {
 
         this.addCommand({
             id: 'init-graph-guru',
-            name: 'Initialize GraphGuru',
+            name: 'Initialize',
             callback: async () => {
                 new Notice("Initializing GraphGuru");
                 const result = await this.runPython();

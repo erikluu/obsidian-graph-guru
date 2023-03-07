@@ -4,15 +4,17 @@ import { spawn, exec, ChildProcess } from 'child_process';
 import GraphGuruPlugin from "./main";
 
 export interface GraphGuruSettings {
-    focus_directory: string;
+    openaiAPIKey: string;
+    openaiAPIKeyShadow: string;
     pythonInterpreter: string;
-	setupScript: string;
+    dependenciesInstalled: boolean;
 }
 
 export const DefaultGuruSettings: GraphGuruSettings= {
-    focus_directory: './',
+    openaiAPIKey: '',
+    openaiAPIKeyShadow: '',
     pythonInterpreter: 'python',
-	setupScript: '',
+    dependenciesInstalled: false,
 } 
 
 export class GraphGuruSettingTab extends PluginSettingTab {
@@ -29,6 +31,37 @@ export class GraphGuruSettingTab extends PluginSettingTab {
         containerEl.empty();
 
         containerEl.createEl('h2', {text: 'Graph Guru Settings'});
+
+        new Setting(containerEl)
+           .setName('OpenAI API key')
+           .setDesc('This key will be used for OpenAI API calls. We cannot see your key. You can get a key from https://beta.openai.com/account/api-keys.')
+           .addButton(button => {
+               button.setButtonText('Show API key');
+               button.onClick(evt => {
+                   let input = containerEl.querySelector('input');
+                   if (input) {
+                       if (input.type === 'password') {
+                           input.type = 'text';
+                           button.setButtonText('Hide API key');
+                       } else {
+                           input.type = 'password';
+                           button.setButtonText('Show API key');
+                       }
+                   }
+               });
+           })
+           .addText(text => text
+               .setPlaceholder("API key")
+               .setValue(this.plugin.settings.openaiAPIKey)
+               .onChange(async (value) => {
+                    this.plugin.settings.openaiAPIKey = value;
+                    await this.plugin.saveSettings();
+
+                    let input = containerEl.querySelector('input');
+                    if (input) {
+                        input.type = 'password';
+                    }
+               }));
 
         new Setting(containerEl)
 			.setName('Python interpreter')
@@ -56,23 +89,13 @@ export class GraphGuruSettingTab extends PluginSettingTab {
                             new Notice('Failed to install dependencies, view developer console for details.');
                         } else {
                             new Notice('Installed dependencies, view developer console for details.');
+                            this.plugin.settings.dependenciesInstalled = true;
                         }
                         console.log(`install stdout: ${stdout}`);
                         console.log(`install stderr: ${stderr}`);
                     });
                 });
             });
-
-        // new Setting(containerEl)
-        //     .setName('Focus Directory')
-        //     .setDesc('Enter the directory you wish for GraphGuru to focus on.')
-        //     .addText(text => text
-        //         .setPlaceholder('Enter your directory')
-        //         .setValue(this.plugin.settings.focus_directory)
-        //         .onChange(async (value) => {
-        //             this.plugin.settings.focus_directory = value;
-        //             await this.plugin.saveSettings();
-        //         }));
     }
 }
 

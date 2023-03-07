@@ -41,8 +41,4 @@ if __name__ == "__main__":
     embeddings = getAllEmbeddings("./my-second-brain")
     with open('./embeddings.json', 'w') as fp:
         json.dump(embeddings, fp)
-    #r = json.dumps(embeddings)
-    #loaded_r = json.loads(r)
-
-    #print(embeddings)
-    #print(embeddings.keys())
+        

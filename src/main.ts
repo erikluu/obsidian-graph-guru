@@ -53,7 +53,7 @@ export default class GraphGuruPlugin extends Plugin {
         try {
             let options = {
                 pythonPath: this.settings.pythonInterpreter,
-                args: [this.baseVaultPath]
+                args: [this.baseVaultPath, this.settings.openaiAPIKey]
             }
             
             this.statusBar.setText(`GraphGuru Processing ⏳`);

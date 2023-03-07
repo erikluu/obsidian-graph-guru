@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import openai
+import numpy as np
 from sklearn.decomposition import PCA
 from tenacity import (
     retry,
@@ -25,7 +26,6 @@ def getAllEmbeddings(path):
     embeddings = {}
     # only getting a subset of the directories and files because it's a lot
     for item in os.listdir(path)[:5]:
-        print(item)
         content = os.path.join(path, item)
         if os.path.isdir(content):
             embeddings.update(getAllEmbeddings(content))
@@ -35,17 +35,32 @@ def getAllEmbeddings(path):
             fp.close()
     return embeddings
 
-def reduce_demensions(vec_embeddings):
+def reduce_dimensions(vec_embeddings):
     pca = PCA(n_components=2)
     pca.fit(vec_embeddings)
     pca_encodings = pca.transform(vec_embeddings)
     return pca_encodings
 
 def main():
-    vault_path = sys.argv[0]
+    vault_path = sys.argv[1]
+    openai.api_key = sys.argv[2]
+
     embeddings = getAllEmbeddings(vault_path)
     with open(f'{vault_path}/.obsidian/plugins/obsidian-graph-guru/results/embeddings.json', 'w') as fp:
         json.dump(embeddings, fp)
+
+    with open(f'{vault_path}/.obsidian/plugins/obsidian-graph-guru/results/embeddings.json','r') as infile:
+        data = json.load(infile)
+
+    embedding_labels = list(data.keys())
+    # embedding_size = len(data[embedding_labels[0]])
+    embeddings = np.array([data[label] for label in embedding_labels])
+    latent_space = reduce_dimensions(embeddings)
+    coordinates = dict(zip(embedding_labels, latent_space.tolist()))
+    with open(f'{vault_path}/.obsidian/plugins/obsidian-graph-guru/results/coordinates.json', 'w') as fp:
+        json.dump(coordinates, fp)
+
+    print("Done!")
 
 if __name__ == "__main__":
     main()

@@ -4,7 +4,7 @@ const { spawn } = require('child_process');
 import { GraphGuruSettings, GraphGuruSettingTab, DefaultGuruSettings } from './settings';
 
 export default class GraphGuruPlugin extends Plugin {
-    guruCoordinates: object[] | unknown[] | null = null;
+    initBool: boolean = false;
     baseVaultPath: string;
     pythonScriptsPath: string;
     settings: GraphGuruSettings;
@@ -25,23 +25,23 @@ export default class GraphGuruPlugin extends Plugin {
             id: 'init-graph-guru',
             name: 'Initialize GraphGuru',
             callback: async () => {
-                const guruCoordinates = await this.runPython();
-                if (guruCoordinates != null) {
-                    this.guruCoordinates = guruCoordinates;
-                    // this.guruCoordinates = test_coordinates;
+                new Notice("Initializing GraphGuru");
+                const result = await this.runPython();
+                if (result != null) {
+                    this.initBool = true;
                     new Notice("GraphGuru is initialized");
                     this.statusBar.setText(`GraphGuru Initialized ✅`);
-                    console.log(this.guruCoordinates);
                     // await this.writeToCSV(this.guruCoordinates);
                 } else {
-                    new Notice("GraphGuru is not initialized");
+                    this.initBool = false;
+                    new Notice("GraphGuru is not initialized. Check developed console for errors.");
                     this.statusBar.setText(`GraphGuru Not Initialized 😡`);
                 }
             }
         });
     
         this.addRibbonIcon("palmtree", "Open GraphGuru", async () => { // or map or anchor for icon 
-            if (this.guruCoordinates != null) {
+            if (this.initBool) {
                 new Notice("GraphGuru is initialized");
             } else {
                 new Notice("GraphGuru is not initialized");

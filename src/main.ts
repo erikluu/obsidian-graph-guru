@@ -41,7 +41,8 @@ export default class GraphGuruPlugin extends Plugin {
         });
     
         // https://lucide.dev
-        this.addRibbonIcon("map-pin", "Open GraphGuru", async () => { // or map or anchor for icon 
+        // globe-2, map-pin, anchor, map
+        this.addRibbonIcon("map-pin", "Open GraphGuru", async () => {
             if (this.initBool) {
                 new Notice("GraphGuru is initialized");
             } else {

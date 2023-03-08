@@ -34,9 +34,10 @@ export class GraphGuruSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
            .setName('OpenAI API key')
-           .setDesc('This key will be used for OpenAI API calls. We cannot see your key. You can get a key from https://beta.openai.com/account/api-keys.')
+           .setDesc('This key will be used for OpenAI API calls. We cannot see your key. You can get a key from https://beta.openai.com/account/api-keys.')   
            .addButton(button => {
-               button.setButtonText('Show API key');
+               button.setButtonText('Hide API key');
+               button.setCta();
                button.onClick(evt => {
                    let input = containerEl.querySelector('input');
                    if (input) {
@@ -79,6 +80,7 @@ export class GraphGuruSettingTab extends PluginSettingTab {
             .setDesc('This will modify your environment-use at your own risk.')
             .addButton(button => {
                 button.setButtonText('Install dependencies');
+                button.setCta();
                 button.onClick(evt => {
                     let interpreter = this.plugin.settings.pythonInterpreter;
                     let command = `${interpreter} -u -m pip install --upgrade openai numpy obsidiantools scikit-learn tenacity markdown pymdown-extensions html2text pandas numpy networkx`;

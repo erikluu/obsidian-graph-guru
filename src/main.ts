@@ -53,11 +53,12 @@ export default class GraphGuruPlugin extends Plugin {
 
     async runPython() {
         try {
-            let options = {
+            const options = {
                 pythonPath: this.settings.pythonInterpreter,
                 args: [this.baseVaultPath, this.settings.openaiAPIKey]
             }
             
+            console.log(options);
             this.statusBar.setText(`GraphGuru Processing ⏳`);
             const result = await PythonShell.run(this.pythonScriptsPath, options);
             console.log(`Python results: ${result}`);

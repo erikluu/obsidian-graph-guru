@@ -25,7 +25,7 @@ def getAllEmbeddings(path):
     # returns a dictionary where {filename1: content1, filename2: content2, ...}
     embeddings = {}
     # only getting a subset of the directories and files because it's a lot
-    for item in os.listdir(path)[:5]:
+    for item in os.listdir(path):
         content = os.path.join(path, item)
         if os.path.isdir(content):
             embeddings.update(getAllEmbeddings(content))
@@ -46,6 +46,9 @@ def main():
     openai.api_key = sys.argv[2]
 
     embeddings = getAllEmbeddings(vault_path)
+
+    print(embeddings.keys())
+    return
     with open(f'{vault_path}/.obsidian/plugins/obsidian-graph-guru/results/embeddings.json', 'w') as fp:
         json.dump(embeddings, fp)
 
@@ -59,6 +62,9 @@ def main():
     coordinates = dict(zip(embedding_labels, latent_space.tolist()))
     with open(f'{vault_path}/.obsidian/plugins/obsidian-graph-guru/results/coordinates.json', 'w') as fp:
         json.dump(coordinates, fp)
+
+    # with open(f'{vault_path}/.obsidian/plugins/obsidian-leaflet-plugin/data.json', 'w') as fp:
+    #     json.dump(coordinates, fp)
 
     print("Done!")
 

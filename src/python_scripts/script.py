@@ -47,8 +47,6 @@ def main():
 
     embeddings = getAllEmbeddings(vault_path)
 
-    print(embeddings.keys())
-    return
     with open(f'{vault_path}/.obsidian/plugins/obsidian-graph-guru/results/embeddings.json', 'w') as fp:
         json.dump(embeddings, fp)
 

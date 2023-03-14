@@ -27,13 +27,12 @@ export default class GraphGuruPlugin extends Plugin {
             name: 'Initialize',
             callback: async () => {
                 new Notice("Initializing GraphGuru");
-                // const result = await this.runPython();
-                const result = true;
+                const result = await this.runPython();
+                // const result = true;
                 if (result != null) {
                     this.initBool = true;
                     new Notice("GraphGuru is initialized");
                     this.statusBar.setText(`GraphGuru Initialized ✅`);
-                    this.writeToMD();
                     this.statusBar.setText(`graph-guru.md created`);
 
                 } else {
@@ -72,24 +71,6 @@ export default class GraphGuruPlugin extends Plugin {
         }
     }
     
-    // write coordinates to file
-    async writeToMD() {
-        // read coordinates.json
-        const coordinates = JSON.parse(fs.readFileSync(this.baseVaultPath + '/.obsidian/plugins/obsidian-graph-guru/results/coordinates.json', 'utf8'));
-
-        // add all coords to a string with the format marker: default, x, y, [filename]
-        // coordinates is a JSON object with the keys as filenames and the value is an array wiih the x and y coordinates
-        let leafletString = '';
-        leafletString += "```leaflet\nid: graph-guru-map\nimage: [[istockphoto-1146986079-170667a.jpg]]\nheight: 500px\nlat: 50\nlong: 50\nminZoom: 1\nmaxZoom: 50\ndefaultZoom: 5\nunit: meters\nscale: 1\n"
-        for (const [key, value] of Object.entries(coordinates).slice(0, 199)) {
-            leafletString += `marker: default, ${parseFloat(value[0]) * 50}, ${parseFloat(value[1]) * 50}, [[${key}]]\n`;
-        }
-        leafletString += "darkMode: True\n```\n";
-
-        this.app.vault.delete(this.app.vault.getAbstractFileByPath("graph-guru.md"));
-        this.app.vault.create('graph-guru.md', leafletString);
-    }
-
     async saveSettings() {
         await this.saveData(this.settings);
     }
